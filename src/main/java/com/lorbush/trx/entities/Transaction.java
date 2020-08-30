@@ -17,6 +17,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
@@ -26,7 +28,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "transaction")
 @EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
 public class Transaction {
+
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,6 +84,7 @@ public class Transaction {
 		this(type, amount, account, currency, description);
 		this.updatedBy = updatedBy;
 	}
+
 
 	public Integer getId() {
 		return id;
@@ -143,5 +149,6 @@ public class Transaction {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
+
 
 }

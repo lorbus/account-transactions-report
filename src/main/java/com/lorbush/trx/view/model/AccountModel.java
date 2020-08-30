@@ -1,18 +1,30 @@
 package com.lorbush.trx.view.model;
 
+import com.lorbush.trx.entities.User;
 import com.lorbush.trx.exceptions.ErrorMessages;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountModel {
 
 	@NotBlank(message = "Field iban" + ErrorMessages.NO_MANDATORY_FIELD_1)
 	@NotNull(message = "Field iban" + ErrorMessages.NO_MANDATORY_FIELD_1)
 	private String iban;
 
-	@NotBlank(message = "Field userId" + ErrorMessages.NO_MANDATORY_FIELD_1)
-	@NotNull(message = "Field userId" + ErrorMessages.NO_MANDATORY_FIELD_1)
-	private String userId;
+	@NotBlank(message = "Field user" + ErrorMessages.NO_MANDATORY_FIELD_1)
+	@NotNull(message = "Field user" + ErrorMessages.NO_MANDATORY_FIELD_1)
+	private User user;
 
 	@NotBlank(message = "Field currency" + ErrorMessages.NO_MANDATORY_FIELD_1)
 	@NotNull(message = "Field currency" + ErrorMessages.NO_MANDATORY_FIELD_1)
@@ -21,18 +33,18 @@ public class AccountModel {
 	public AccountModel() {
 	}
 
-	public AccountModel(String iban, String userId, String currency) {
+	public AccountModel(String iban, User user, String currency) {
 		this.iban = iban;
-		this.userId = userId;
+		this.user = user;
 		this.currency = currency;
 	}
 
-	public String getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getCurrency() {

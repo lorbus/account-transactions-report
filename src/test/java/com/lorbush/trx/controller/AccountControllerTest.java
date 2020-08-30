@@ -2,6 +2,7 @@ package com.lorbush.trx.controller;
 
 import com.lorbush.trx.entities.Currency;
 import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.User;
 import com.lorbush.trx.helper.Helper;
 import com.lorbush.trx.service.AccountService;
 import com.lorbush.trx.helper.HelperImpl;
@@ -44,10 +45,14 @@ public class AccountControllerTest {
 	}
 
 	public static final String ACCOUNT_IBAN_1 = "CH93-0000-0000-0000-0000-1";
-	public static final String UPDATED_BY = "user1";
-	public static final String USER = "user1";
+	public static final String UPDATED_BY = "testAccountController";
+	public static final Long USER_ID = 1L;
 	public static final String CURRENCY_ID = "EUR";
 	public static final String EUR_CURRENCY = "EUR";
+	public static final BigDecimal BALANCE_0 = new BigDecimal(0);
+	public static final String USERNAME = "username";
+	public static final String FIRST_NAME = "firstName";
+	public static final String LAST_NAME = "lastName";
 
 	@Autowired
 	private MockMvc mvc;
@@ -55,14 +60,15 @@ public class AccountControllerTest {
 	@MockBean
 	private AccountService service;
 
+	private User user;
 	private Currency currency;
 	private Account account;
 
 	@Before
 	public void before() {
+		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
 		currency = new Currency(CURRENCY_ID, EUR_CURRENCY, UPDATED_BY);
-		account = new Account(ACCOUNT_IBAN_1, USER, new Currency(CURRENCY_ID, EUR_CURRENCY, UPDATED_BY),
-				new BigDecimal(0), UPDATED_BY);
+		account = new Account(ACCOUNT_IBAN_1, user, currency, BALANCE_0, UPDATED_BY);
 		account.setId(1);
 	}
 
@@ -72,7 +78,7 @@ public class AccountControllerTest {
 
 		given(service.findAll()).willReturn(allAccounts);
 
-		mvc.perform(get("/api/accounts").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mvc.perform(get("/api/v1/accounts").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(1))).andExpect(jsonPath("$[0].id", is(account.getId())));
 	}
 
@@ -81,9 +87,9 @@ public class AccountControllerTest {
 
 		given(service.findById(account.getId())).willReturn(account);
 
-		mvc.perform(get("/api/account/" + account.getId().toString()).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/api/v1/account/" + account.getId().toString()).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id", is(account.getId())))
-				.andExpect(jsonPath("$.userId", is(account.getUserId())))
+				.andExpect(jsonPath("$.user.id", is(account.getUser().getId())))
 				.andExpect(jsonPath("$.currency.id", is(account.getCurrency().getId())))
 				.andExpect(jsonPath("$.balance", is(account.getBalance().intValue())))
 				.andExpect(jsonPath("$.updatedBy", is(account.getUpdatedBy())));
@@ -92,24 +98,24 @@ public class AccountControllerTest {
 	@Test
 	public void testGetAccountByUserId_thenReturnJson() throws Exception {
 
-		given(service.findByUserId(account.getUserId())).willReturn(Arrays.asList(account));
+		given(service.findByUserId(account.getUser())).willReturn(Arrays.asList(account));
 
-		mvc.perform(get("/api/accounts/user").param("userId", account.getUserId()).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/api/v1/accounts/user").param("userId", String.valueOf(account.getUser().getId())).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-				.andExpect(jsonPath("$[0].userId", is(account.getUserId())));
+				.andExpect(jsonPath("$[0].user.id", is(account.getUser().getId())));
 	}
 
 	@Test
 	public void testCreateAccount_thenReturnJson() throws Exception {
 
-		given(service.createAccount(ACCOUNT_IBAN_1, USER, EUR_CURRENCY)).willReturn(account);
-		String validCurrencyJson = "{ \"iban\":\"" + ACCOUNT_IBAN_1 + "\", \"userId\":\"" + USER + "\",\"currency\":\""
+		given(service.createAccount(ACCOUNT_IBAN_1, user, EUR_CURRENCY)).willReturn(account);
+		String validCurrencyJson = "{ \"iban\":\"" + ACCOUNT_IBAN_1 + "\", \"userId\":\"" + USER_ID + "\",\"currency\":\""
 				+ EUR_CURRENCY + "\"}";
 
-		mvc.perform(post("/api/account").content(validCurrencyJson).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/account").content(validCurrencyJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id", is(account.getId())))
-				.andExpect(jsonPath("$.iban", is(account.getIBan())))
-				.andExpect(jsonPath("$.userId", is(account.getUserId())))
+				.andExpect(jsonPath("$.iban", is(account.getIban())))
+				.andExpect(jsonPath("$.user.id", is(account.getUser().getId())))
 				.andExpect(jsonPath("$.currency.name", is(EUR_CURRENCY)))
 				.andExpect(jsonPath("$.balance", is(account.getBalance().intValue())))
 				.andExpect(jsonPath("$.updatedBy", is(account.getUpdatedBy())));
@@ -117,38 +123,38 @@ public class AccountControllerTest {
 
 	@Test
 	public void testCreateAccount_NoCurrency() throws Exception {
-		given(service.createAccount(ACCOUNT_IBAN_1, USER, currency.getName())).willReturn(account);
-		String notValidCurrencyJson = "{ \"iban\":\"" + ACCOUNT_IBAN_1 + "\", \"userId\":\"" + USER + "\" }";
+		given(service.createAccount(ACCOUNT_IBAN_1, user, currency.getName())).willReturn(account);
+		String notValidCurrencyJson = "{ \"iban\":\"" + ACCOUNT_IBAN_1 + "\", \"userId\":\"" + USER_ID + "\" }";
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "currency");
 
-		mvc.perform(post("/api/account").content(notValidCurrencyJson).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/account").content(notValidCurrencyJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/account")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/account")));
 	}
 
 	@Test
 	public void testCreateAccount_NoUserId() throws Exception {
 
-		given(service.createAccount(ACCOUNT_IBAN_1, USER, currency.getName())).willReturn(account);
+		given(service.createAccount(ACCOUNT_IBAN_1, user, currency.getName())).willReturn(account);
 		String notValidUserIdJson = "{ \"iban\":\"" + ACCOUNT_IBAN_1 + "\", \"currency\":\"" + EUR_CURRENCY + "\"}";
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "userId");
 
-		mvc.perform(post("/api/account").content(notValidUserIdJson).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/account").content(notValidUserIdJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/account")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/account")));
 	}
 
 	@Test
 	public void testCreateAccount_MalformedJson() throws Exception {
 
-		given(service.createAccount(ACCOUNT_IBAN_1, USER, currency.getName())).willReturn(account);
+		given(service.createAccount(ACCOUNT_IBAN_1, user, currency.getName())).willReturn(account);
 		String malformedJson = "{ not correct Json ";
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "currency");
 
-		mvc.perform(post("/api/account").content(malformedJson).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/account").content(malformedJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message", containsString("JSON parse error: Unexpected character")))
-				.andExpect(jsonPath("$.details", is("uri=/api/account")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/account")));
 	}
 
 }

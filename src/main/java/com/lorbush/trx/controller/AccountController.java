@@ -1,6 +1,7 @@
 package com.lorbush.trx.controller;
 
 import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.User;
 import com.lorbush.trx.exceptions.CustomException;
 import com.lorbush.trx.gson.adapter.HibernateProxyTypeAdapter;
 import com.lorbush.trx.gson.exclusion.ExcludeField;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -32,19 +35,13 @@ class AccountController {
 	@Autowired
 	private Helper inputParametersValidator;
 
-	@GetMapping(value = "api/test", produces = MediaType.TEXT_PLAIN_VALUE)
-	@ResponseBody
-	public String test() throws CustomException, ClassNotFoundException {
-		return "Hello from account transactions report!";
-	}
-
 	/**
 	 *
 	 * @return the list of all accounts
 	 * @throws CustomException when failed to get the accounts
 	 * @throws ClassNotFoundException
 	 */
-	@GetMapping(value = "api/accounts", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "api/v1/accounts", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getAll() throws CustomException, ClassNotFoundException {
 		logger.debug("Call AccountController.getAll");
@@ -59,7 +56,7 @@ class AccountController {
 	 * @throws CustomException when failed to get the account by id
 	 * @throws ClassNotFoundException
 	 */
-	@GetMapping(value = "api/account/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "api/v1/account/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getAccountById(@PathVariable("id") Integer id) throws CustomException, ClassNotFoundException {
 		logger.debug("Called AccountController.getAccountById with id={}", id);
@@ -70,18 +67,18 @@ class AccountController {
 
 	/**
 	 *
-	 * @param userId
+	 * @param user
 	 * @return the list of Accounts of a User
 	 * @throws CustomException when failed to get the accounts by user id
 	 * @throws ClassNotFoundException
 	 */
-	@GetMapping(value = "api/accounts/user", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "api/v1/accounts/user", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String getAccountsByUserId(@RequestParam("userId") String userId)
+	public String getAccountsByUserId(@RequestParam("userId") User user)
 			throws CustomException, ClassNotFoundException {
-		logger.debug("Call AccountController.getAccountsByUserId with userId={}", userId);
+		logger.debug("Call AccountController.getAccountsByUserId with userId={}", user.getId());
 
-		List<Account> accounts = accountService.findByUserId(userId);
+		List<Account> accounts = accountService.findByUserId(user);
 		return new GsonBuilder().setExclusionStrategies(new GsonExclusionStrategy(ExcludeField.EXCLUDE_TRANSACTIONS))
 				.create().toJson(accounts);
 	}
@@ -93,11 +90,11 @@ class AccountController {
 	 * @return new account created in JSON format
 	 * @throws CustomException when failed to create account
 	 */
-	@PostMapping(value = "api/account", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "api/v1/account", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String createAccount(@Valid @RequestBody AccountModel accountModel) throws CustomException {
 		logger.debug("Call AccountController.createAccount");
-		Account account = accountService.createAccount(accountModel.getIban(), accountModel.getUserId(),
+		Account account = accountService.createAccount(accountModel.getIban(), accountModel.getUser(),
 				accountModel.getCurrency());
 		return new GsonBuilder().registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY).create().toJson(account);
 	}

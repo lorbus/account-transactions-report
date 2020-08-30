@@ -43,7 +43,7 @@ public class TransactionController {
 	 * @throws CustomException when failed to obtain Transactions
 	 * @throws ClassNotFoundException
 	 */
-	@GetMapping(value = "api/accounts/{id}/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "api/v1/accounts/{id}/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getAccountTransactionsById(@PathVariable("id") Integer id)
 			throws CustomException, ClassNotFoundException {
@@ -76,7 +76,7 @@ public class TransactionController {
 	 * @throws CustomException when transaction could not be created
 	 * @throws ClassNotFoundException
 	 */
-	@PostMapping(value = "api/transaction", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "api/v1/transaction", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String createAccountTransaction(@Valid @RequestBody TransactionModel transactionModel)
 			throws CustomException, ClassNotFoundException {

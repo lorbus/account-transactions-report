@@ -1,5 +1,9 @@
 package com.lorbush.trx.entities;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -15,6 +19,8 @@ import java.util.List;
 @Entity
 @Table(name = "account")
 @EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
 public class Account {
 
 	@Id
@@ -26,9 +32,10 @@ public class Account {
 	@Column(name = "iban")
 	private String iban;
 
-	@NotNull(message = "User Id must be provided")
-	@Column(name = "user_id")
-	private String userId;
+	@NotNull(message = "Account user must be provided")
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 
 	@Min(0)
 	@Column(name = "balance", nullable = false)
@@ -47,24 +54,26 @@ public class Account {
 	@Column(name = "updated_by")
 	private String updatedBy;
 
-	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "account")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Transaction> transactions;
 
 	public Account() {
 	}
 
-	public Account(String iban, String userId, Currency currency, BigDecimal balance) {
+	public Account(String iban, User user, Currency currency, BigDecimal balance) {
 		this.iban = iban;
-		this.userId = userId;
+		this.user = user;
 		this.balance = balance;
 		this.currency = currency;
 		this.updatedOn = new Date();
 	}
 
-	public Account(String iban, String userId, Currency currency, BigDecimal balance, String updatedBy) {
-		this(iban, userId, currency, balance);
+	public Account(String iban, User user, Currency currency, BigDecimal balance, String updatedBy) {
+		this(iban, user, currency, balance);
 		this.updatedBy = updatedBy;
 	}
+
 
 	public Integer getId() {
 		return id;
@@ -74,7 +83,7 @@ public class Account {
 		this.id = id;
 	}
 
-	public String getIBan() {
+	public String getIban() {
 		return iban;
 	}
 
@@ -122,11 +131,13 @@ public class Account {
 		this.transactions = transactions;
 	}
 
-	public String getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
+
+
 }

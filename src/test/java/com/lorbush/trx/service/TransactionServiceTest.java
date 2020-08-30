@@ -1,9 +1,6 @@
 package com.lorbush.trx.service;
 
-import com.lorbush.trx.entities.Currency;
-import com.lorbush.trx.entities.Transaction;
-import com.lorbush.trx.entities.TransactionType;
-import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.*;
 import com.lorbush.trx.exceptions.ErrorMessages;
 import com.lorbush.trx.exceptions.CustomException;
 import com.lorbush.trx.helper.Helper;
@@ -55,12 +52,17 @@ public class TransactionServiceTest {
 		}
 	}
 
-	public static final String UPDATED_BY = "user";
-	public static final String USER = "user";
+	public static final String UPDATED_BY = "testTransactionService";
 	public static final String GBP_CURRENCY = "GBP";
 	public static final String CURRENCY_ID = "GBP";
 	public static final String ACCOUNT_ID_1 = "CH93-0000-0000-0000-0000-1";
 	public static final String ACCOUNT_ID_2 = "CH93-0000-0000-0000-0000-2";
+	public static final BigDecimal BALANCE_0 = new BigDecimal(0);
+	public static final BigDecimal BALANCE_20 = new BigDecimal(20);
+	public static final BigDecimal BALANCE_40 = new BigDecimal(40);
+	public static final String USERNAME = "username";
+	public static final String FIRST_NAME = "firstName";
+	public static final String LAST_NAME = "lastName";
 
 	@Value("${application.transactionCredit.type.credit}")
 	String credit;
@@ -86,6 +88,7 @@ public class TransactionServiceTest {
 	@MockBean
 	private AccountService accountService;
 
+	private User user;
 	private Currency currency;
 	private Account account1;
 	private Account account2;
@@ -96,16 +99,17 @@ public class TransactionServiceTest {
 
 	@Before
 	public void setUp() throws CustomException {
+		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
 		currency = new Currency(CURRENCY_ID, GBP_CURRENCY, UPDATED_BY);
-		account1 = new Account(ACCOUNT_ID_1, USER, currency, new BigDecimal(0), UPDATED_BY);
+		account1 = new Account(ACCOUNT_ID_1, user, currency, BALANCE_0, UPDATED_BY);
 		account1.setId(1);
-		account2 = new Account(ACCOUNT_ID_2, USER, currency, new BigDecimal(40), UPDATED_BY);
+		account2 = new Account(ACCOUNT_ID_2, user, currency, BALANCE_40, UPDATED_BY);
 		account2.setId(2);
 		typeCredit = new TransactionType(credit, "credit trx", UPDATED_BY);
 		typeDebit = new TransactionType(debit, "debit trx", UPDATED_BY);
-		transactionCredit = new Transaction(typeCredit, new BigDecimal(20), account1, currency, "Credit transaction");
+		transactionCredit = new Transaction(typeCredit, BALANCE_20, account1, currency, "Credit transaction");
 		transactionCredit.setId(5);
-		transactionDebit = new Transaction(typeDebit, new BigDecimal(20), account2, currency, "Debit transaction");
+		transactionDebit = new Transaction(typeDebit, BALANCE_20, account2, currency, "Debit transaction");
 		transactionDebit.setId(6);
 
 		Mockito.when(accountService.findById(account1.getId())).thenReturn(account1);
@@ -115,7 +119,7 @@ public class TransactionServiceTest {
 
 		Currency wrong = new Currency("GBP;", "Wrong", UPDATED_BY);
 		Mockito.when(currencyRepository.findByName("Wrong")).thenReturn(wrong);
-		Mockito.when(accountRepository.save(new Account(ACCOUNT_ID_1, USER, wrong, new BigDecimal(0), UPDATED_BY)))
+		Mockito.when(accountRepository.save(new Account(ACCOUNT_ID_1, user, wrong, BALANCE_0, UPDATED_BY)))
 				.thenThrow(new ObjectNotFoundException("", ""));
 		Mockito.when(currencyRepository.findByName(GBP_CURRENCY)).thenReturn(currency);
 		Mockito.when(transactionTypeRepository.getOne(typeCredit.getId())).thenReturn(typeCredit);

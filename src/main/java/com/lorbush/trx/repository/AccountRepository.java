@@ -1,5 +1,7 @@
 package com.lorbush.trx.repository;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -16,5 +18,5 @@ import com.lorbush.trx.exceptions.CustomException;
 @Transactional(rollbackOn = CustomException.class)
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 	List<Account> findAllByOrderByIdAsc();
-	List<Account> findByUserId(String userId);
+	List<Account> findByUserId(Long userId);
 }

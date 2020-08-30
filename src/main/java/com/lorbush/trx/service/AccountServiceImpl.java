@@ -2,6 +2,7 @@ package com.lorbush.trx.service;
 
 import com.lorbush.trx.entities.Currency;
 import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.User;
 import com.lorbush.trx.exceptions.ErrorMessages;
 import com.lorbush.trx.exceptions.CustomException;
 import com.lorbush.trx.repository.CurrencyRepository;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -91,33 +93,33 @@ class AccountServiceImpl implements AccountService {
 
     /**
      *
-     * @param userId
+     * @param user
      * @return the list af accounts found by user Id
      * @throws CustomException when not possible to obtain the list of accounts
      */
     @Transactional(rollbackFor = CustomException.class)
     @Override
-    public List<Account> findByUserId(@NotBlank String userId) throws CustomException {
+    public List<Account> findByUserId(@NotBlank User user) throws CustomException {
         logger.debug("Call AccountServiceImpl.findByUserId");
-        return accountRepository.findByUserId(userId);
+        return accountRepository.findByUserId(user.getId());
     }
 
     /**
      * Creates account based on currency.
-     * @param userId valid currency id
+     * @param user valid currency id
      * @param currencyName valid currency name
      * @return created account
      * @throws CustomException when not possible to create the account
      */
     @Transactional(rollbackFor = CustomException.class)
     @Override
-    public Account createAccount(@NotBlank String id, @NotBlank String userId, @NotBlank String currencyName) throws CustomException {
+    public Account createAccount(@NotBlank String id, @NotBlank User user, @NotBlank String currencyName) throws CustomException {
         logger.debug("Call AccountServiceImpl.createAccount");
         try {
             Currency currency = currencyRepository.findByName(currencyName);
             String error = String.format(ErrorMessages.NO_CURRENCY_PRESENT,currencyName);
-            inputParametersValidator.conditionIsTrue(currency != null,error,HttpStatus.BAD_REQUEST.value());
-            return accountRepository.save(new Account(id, userId, currency, new BigDecimal(0), updatedBy));
+            inputParametersValidator.conditionIsTrue(currency != null, error, HttpStatus.BAD_REQUEST.value());
+            return accountRepository.save(new Account(id, user, currency, new BigDecimal(0), updatedBy));
         } catch (ObjectNotFoundException e){
             throw new CustomException(String.format(ErrorMessages.NO_CURRENCY_PRESENT,currencyName),HttpStatus.BAD_REQUEST.value());
         }

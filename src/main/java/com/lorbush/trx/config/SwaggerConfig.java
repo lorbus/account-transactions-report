@@ -2,6 +2,7 @@ package com.lorbush.trx.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
@@ -13,7 +14,7 @@ import static springfox.documentation.builders.PathSelectors.regex;
 
 @EnableSwagger2
 @Configuration
-public class SwaggerConfig {
+public class SwaggerConfig extends WebMvcConfigurationSupport {
 
     @Bean
     public Docket productApi() {
@@ -32,8 +33,7 @@ public class SwaggerConfig {
                 "Spring Boot Swagger API Test",
                 "1.0",
                 "Terms of Service",
-                new Contact("lorbush", "https://www.lorbush.com",
-                        "lorbush@gmail.com"),
+                "lorbush@gmail.com",
                 "Apache License Version 2.0",
                 "https://www.apache.org/license.html"
         );

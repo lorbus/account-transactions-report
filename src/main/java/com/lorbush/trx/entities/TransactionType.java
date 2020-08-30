@@ -1,5 +1,7 @@
 package com.lorbush.trx.entities;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.util.Date;
@@ -14,6 +16,8 @@ import java.util.Date;
 @Entity
 @Table(name = "transaction_type")
 @EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
 public class TransactionType {
 
 	@Id
@@ -39,6 +43,7 @@ public class TransactionType {
 		this.updatedOn = new Date();
 		this.updatedBy = updatedBy;
 	}
+
 
 	public String getId() {
 		return id;
@@ -71,5 +76,6 @@ public class TransactionType {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
+
 
 }

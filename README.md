@@ -5,7 +5,13 @@ a given customer, and the total amount in GBP; creates accounts, transactions an
 Search for accounts and transactions. In order to create successfully a debit transaction will the funds sufficient 
 should be sufficient in the account (total available balance - debit amount >= 0). Currencies for transactions should be
 already created in the currency table, and currency of the account must be the same as the currency of the transaction.
-
+REST APIs are protected with Spring Security and JWT
+1. Get the JWT based token from the authentication endpoint.
+2. Extract token from the authentication result.
+3. Set the HTTP header `Authorization` value as `Bearer jwt_token`.
+4. Then send a request to access the protected resources. 
+5. If the requested resource is protected, Spring Security will use our custom `Filter` to validate the JWT token, and build an `Authentication` object and set it in Spring Security specific `SecurityContextHolder` to complete the authentication progress.
+6. If the JWT token is valid it will return the requested resource to client.
 
 ## Running
 
@@ -47,56 +53,53 @@ already created in the currency table, and currency of the account must be the s
     ```
     java -jar target/account-transactions-report-0.0.1-SNAPSHOT.jar
     ```
-8. To verify that the application has started correctly go to :
-    ``` 
-    http://localhost:4444/api/test
-    ``` 
-    The following message should appear in the browser :
-    ```
-    Hello from account transactions report!
-    ```
 
 ## API Endpoints
 
 ### HTTP GET
 1.  Return all accounts
     ```
-    http://localhost:4444/api/accounts
+    http://localhost:4444/api/v1/accounts
     ```
 
 2.  Return account by id
     ```
-    http://localhost:4444/api/account/{id}
+    http://localhost:4444/api/v1/account/{id}
     ```
 
 3.  Return list of accounts by user id
     ```
-    http://localhost:4444/api/accounts/user?userId={user}
+    http://localhost:4444/api/v1/accounts/user?userId={user}
     ```
 
 4.  Return list of transactions by account id    
     ```
-    http://localhost:4444/api/accounts/{id}/transactions
+    http://localhost:4444/api/v1/accounts/{id}/transactions
     ```
 
 ### HTTP POST
-1.  Creates new account
+1.  Authentication endpoint 
     ```
-    http://localhost:4444/api/account
+    http://localhost:4444/auth/signin
     ```
 
-2.  Creates transaction   
+2.  Creates new account
     ```
-    http://localhost:4444/api/transaction
+    http://localhost:4444/api/v1/account
+    ```
+
+3.  Creates transaction
+    ```
+    http://localhost:4444/api/v1/transaction
     ```
     
 
 ## Used technology
 
 1.  Spring Boot v2 (Spring v5) and Spring Data JPA
-2.  Swagger/OpenAPI v.2 (RESTful API Documentation Specification) 
+2.  Swagger/OpenAPI version 2 (RESTful API Documentation Specification) 
     ```
-    http://localhost:4444/api/swagger-ui.html
+    http://localhost:4444/api/v1/swagger-ui.html
     ```
 3.  SLF4J logging facade for Java
 4.  Undertow as web server to run the application
@@ -105,9 +108,9 @@ already created in the currency table, and currency of the account must be the s
 7.  Dockers (with PostgreSQL and Java 8 images)
 8.  Flyway tool for DB migrations and versioning
 9.  Undertow embedded web server
+10. Authentication with JWT and OAUTH2
 
 ## Not Implemented
 
-1.  Security
-2.  Authentication (JWT)
-3.  Authorization
+1.  CD/CI
+2.  Integration tests

@@ -1,9 +1,6 @@
 package com.lorbush.trx.repository;
 
-import com.lorbush.trx.entities.Currency;
-import com.lorbush.trx.entities.Transaction;
-import com.lorbush.trx.entities.TransactionType;
-import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,23 +14,28 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.validation.ConstraintViolationException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 /**
- * TransactionRepository tests Use in-memory h2database
+ * TransactionRepository tests
+ *
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @PropertySource("classpath:application.properties")
 public class TransactionRepositoryTest {
 
-	public static final String UPDATED_BY = "user";
-	public static final String USER = "user";
+	public static final String UPDATED_BY = "testTransactionRepository";
 	public static final String CURRENCY_EUR = "EUR";
 	public static final String ACCOUNT_IBAN_1 = "CH93-0000-0000-0000-0000-1";
 	public static final String ACCOUNT_IBAN_2 = "CH93-0000-0000-0000-0000-2";
+	public static final BigDecimal BALANCE_0 = new BigDecimal(0);
+	public static final String USERNAME = "username";
+	public static final String FIRST_NAME = "firstName";
+	public static final String LAST_NAME = "lastName";
 
 	@Value("${application.transaction.type.credit}")
 	String credit;
@@ -56,6 +58,7 @@ public class TransactionRepositoryTest {
 	@Autowired
 	private CurrencyRepository currencyRepository;
 
+	private User user;
 	private Account account1;
 	private Account account2;
 	private Currency currency;
@@ -66,13 +69,12 @@ public class TransactionRepositoryTest {
 
 	@Before
 	public void before() {
+		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
 		currency = new Currency(CURRENCY_EUR, EUR_CURRENCY, UPDATED_BY);
 		entityManager.persistAndFlush(currency);
 
-		account1 = new Account(ACCOUNT_IBAN_1, USER, new Currency(CURRENCY_EUR, EUR_CURRENCY, UPDATED_BY),
-				new BigDecimal(0), UPDATED_BY);
-		account2 = new Account(ACCOUNT_IBAN_2, USER, new Currency(CURRENCY_EUR, EUR_CURRENCY, UPDATED_BY),
-				new BigDecimal(0), UPDATED_BY);
+		account1 = new Account(ACCOUNT_IBAN_1, user, currency, BALANCE_0, UPDATED_BY);
+		account2 = new Account(ACCOUNT_IBAN_2, user, currency, BALANCE_0, UPDATED_BY);
 
 		entityManager.persist(account1);
 		entityManager.persist(account2);

@@ -3,7 +3,7 @@ services:
   app:
     container_name: app-springboot-postgresql
     image: app-springboot-postgresql
-    build: ./
+    build: ../../..
     ports:
       - "4444:4444"
     depends_on:

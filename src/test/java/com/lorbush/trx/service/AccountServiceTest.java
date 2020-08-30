@@ -2,6 +2,7 @@ package com.lorbush.trx.service;
 
 import com.lorbush.trx.entities.Currency;
 import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.User;
 import com.lorbush.trx.exceptions.ErrorMessages;
 import com.lorbush.trx.exceptions.CustomException;
 import com.lorbush.trx.repository.CurrencyRepository;
@@ -54,12 +55,18 @@ public class AccountServiceTest {
 		}
 	}
 
-	public static final String UPDATED_BY = "user";
-	public static final String USER = "user";
+	public static final String UPDATED_BY = "testAccountService";
+	public static final Long USER_ID = 1L;
 	public static final String CURRENCY_ID = "GBP";
 	public static final String GBP_CURRENCY = "GBP";
 	public static final String ACCOUNT_IBAN_1 = "CH93-0000-0000-0000-0000-1";
 	public static final String ACCOUNT_IBAN_2 = "CH93-0000-0000-0000-0000-2";
+	public static final BigDecimal BALANCE_0 = new BigDecimal(0);
+	public static final BigDecimal BALANCE_20 = new BigDecimal(20);
+	public static final String USERNAME = "username";
+	public static final String FIRST_NAME = "firstName";
+	public static final String LAST_NAME = "lastName";
+
 
 	@Value("${db.updated_by}")
 	String updatedBy;
@@ -76,16 +83,18 @@ public class AccountServiceTest {
 	@MockBean
 	private CurrencyRepository currencyRepository;
 
-	Currency currency;
-	Account account1;
-	Account account2;
+	private User user;
+	private Currency currency;
+	private Account account1;
+	private Account account2;
 
 	@Before
 	public void setUp() {
+		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
 		currency = new Currency(CURRENCY_ID, GBP_CURRENCY, UPDATED_BY);
-		account1 = new Account(ACCOUNT_IBAN_1, USER, currency, new BigDecimal(0), UPDATED_BY);
+		account1 = new Account(ACCOUNT_IBAN_1, user, currency, BALANCE_0, UPDATED_BY);
 		account1.setId(1);
-		account2 = new Account(ACCOUNT_IBAN_2, USER, currency, new BigDecimal(20), UPDATED_BY);
+		account2 = new Account(ACCOUNT_IBAN_2, user, currency, BALANCE_20, UPDATED_BY);
 		account2.setId(2);
 
 		Mockito.when(accountRepository.findAllByOrderByIdAsc()).thenReturn(Arrays.asList(account1, account2));
@@ -93,12 +102,12 @@ public class AccountServiceTest {
 		Mockito.when(accountRepository.findById(account1.getId())).thenReturn(Optional.of(account1));
 		Mockito.when(accountRepository.findById(1111)).thenReturn(Optional.empty());
 
-		Mockito.when(accountRepository.findByUserId(USER)).thenReturn(Arrays.asList(account1, account2));
-		Mockito.when(accountRepository.findByUserId("test")).thenReturn(new ArrayList<Account>());
+		Mockito.when(accountRepository.findByUserId(USER_ID)).thenReturn(Arrays.asList(account1, account2));
+		Mockito.when(accountRepository.findByUserId(1L)).thenReturn(new ArrayList<Account>());
 
 		Currency wrong = new Currency("GBP", "Wrong", UPDATED_BY);
 		Mockito.when(currencyRepository.findByName("Wrong")).thenReturn(wrong);
-		Mockito.when(accountRepository.save(new Account(ACCOUNT_IBAN_1, USER, wrong, new BigDecimal(0), UPDATED_BY)))
+		Mockito.when(accountRepository.save(new Account(ACCOUNT_IBAN_1, user, wrong, BALANCE_0, UPDATED_BY)))
 				.thenThrow(new ObjectNotFoundException("", ""));
 		Mockito.when(currencyRepository.findByName(GBP_CURRENCY)).thenReturn(currency);
 		Mockito.when(accountRepository.save(account1)).thenReturn(account1);
@@ -140,7 +149,7 @@ public class AccountServiceTest {
 
 	@Test
 	public void testFindByUserId_Success() throws CustomException {
-		List<Account> found = accountService.findByUserId(account1.getUserId());
+		List<Account> found = accountService.findByUserId(account1.getUser());
 		assertNotNull(found);
 		assertTrue(found.size() == 2);
 	}
@@ -152,25 +161,27 @@ public class AccountServiceTest {
 
 	@Test
 	public void testFindByUserId_DoesntExist() throws CustomException {
-		List<Account> found = accountService.findByUserId("test");
+		User user = new User();
+		user.setId(-1L);
+		List<Account> found = accountService.findByUserId(user);
 		assertNotNull(found);
 		assertTrue(found.size() == 0);
 	}
 
 	@Test(expected = ConstraintViolationException.class)
 	public void testCreateAccount_Null() throws CustomException {
-		Account found = accountService.createAccount(ACCOUNT_IBAN_1, USER, null);
+		Account found = accountService.createAccount(ACCOUNT_IBAN_1, user, null);
 	}
 
 	@Test(expected = ConstraintViolationException.class)
 	public void testCreateAccount_Blank() throws CustomException {
-		Account found = accountService.createAccount(ACCOUNT_IBAN_2, USER, "");
+		Account found = accountService.createAccount(ACCOUNT_IBAN_2, user, "");
 	}
 
 	@Test
 	public void testCreateAccount_CurrencyNotFound() throws CustomException {
 		try {
-			Account found = accountService.createAccount(ACCOUNT_IBAN_2, USER, "Wrong");
+			Account found = accountService.createAccount(ACCOUNT_IBAN_2, user, "Wrong");
 		} catch (CustomException e) {
 			assertEquals(e.getMessage(), String.format(ErrorMessages.NO_CURRENCY_PRESENT, "Wrong"));
 			assertEquals(e.getErrorCode(), HttpStatus.BAD_REQUEST.value());
@@ -180,7 +191,7 @@ public class AccountServiceTest {
 	@Test
 	public void testCreateAccount_Success() throws CustomException {
 		Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenReturn(account1);
-		Account found = accountService.createAccount(ACCOUNT_IBAN_1, USER, GBP_CURRENCY);
+		Account found = accountService.createAccount(ACCOUNT_IBAN_1, user, GBP_CURRENCY);
 		assertEquals(found.getId(), account1.getId());
 	}
 
@@ -232,4 +243,5 @@ public class AccountServiceTest {
 			assertEquals(ex.getErrorCode(), HttpStatus.BAD_REQUEST.value());
 		}
 	}
+
 }

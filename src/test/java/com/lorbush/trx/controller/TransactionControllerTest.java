@@ -1,9 +1,6 @@
 package com.lorbush.trx.controller;
 
-import com.lorbush.trx.entities.Currency;
-import com.lorbush.trx.entities.Transaction;
-import com.lorbush.trx.entities.TransactionType;
-import com.lorbush.trx.entities.Account;
+import com.lorbush.trx.entities.*;
 import com.lorbush.trx.service.TransactionService;
 import com.lorbush.trx.helper.Helper;
 import com.lorbush.trx.helper.HelperImpl;
@@ -48,12 +45,16 @@ public class TransactionControllerTest {
 		}
 	}
 
-	public static final String UPDATED_BY = "user2";
-	public static final String USER = "user2";
+	public static final String UPDATED_BY = "testTransactionController";
 	public static final String CREDIT = "C";
 	public static final String CURRENCY_ID = "CHF";
 	public static final String CHF_CURRENCY = "CHF";
 	public static final String ACCOUNT_IBAN_1 = "CH93-0000-0000-0000-0000-1";
+	public static final BigDecimal BALANCE_0 = new BigDecimal(0);
+	public static final BigDecimal BALANCE_20 = new BigDecimal(20);
+	public static final String USERNAME = "username";
+	public static final String FIRST_NAME = "firstName";
+	public static final String LAST_NAME = "lastName";
 
 	@Autowired
 	private MockMvc mvc;
@@ -61,6 +62,7 @@ public class TransactionControllerTest {
 	@MockBean
 	private TransactionService service;
 
+	private User user;
 	private Currency currency;
 	private Account account;
 	private Transaction transactionCredit;
@@ -68,12 +70,14 @@ public class TransactionControllerTest {
 
 	@Before
 	public void before() {
+		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
 		currency = new Currency(CURRENCY_ID, CHF_CURRENCY, UPDATED_BY);
-		account = new Account(ACCOUNT_IBAN_1, USER, new Currency(CURRENCY_ID, CHF_CURRENCY, UPDATED_BY),
-				new BigDecimal(0), UPDATED_BY);
+		account = new Account(ACCOUNT_IBAN_1, user, currency, BALANCE_0, UPDATED_BY);
 		account.setId(1);
-		typeCredit = new TransactionType(CREDIT, "credit trx", UPDATED_BY);
-		transactionCredit = new Transaction(typeCredit, new BigDecimal(20), account, currency, "Credit transaction");
+		String trxTypeCreditDesc = "credit trx";
+		typeCredit = new TransactionType(CREDIT, trxTypeCreditDesc, UPDATED_BY);
+		String trxDesc = "Credit transaction";
+		transactionCredit = new Transaction(typeCredit, BALANCE_20, account, currency, trxDesc);
 		transactionCredit.setId(5);
 	}
 
@@ -82,7 +86,7 @@ public class TransactionControllerTest {
 		List<Transaction> allTransactions = Arrays.asList(transactionCredit);
 		given(service.getTransactionsByAccountId(account.getId())).willReturn(allTransactions);
 
-		mvc.perform(get("/api/accounts/" + account.getId() + "/transactions").contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/api/v1/accounts/" + account.getId() + "/transactions").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.transactions", hasSize(1)))
 				.andExpect(jsonPath("$.poundTotalAmount", is(0)))
 				.andExpect(jsonPath("$.transactions[0].id", is(transactionCredit.getId())))
@@ -107,7 +111,7 @@ public class TransactionControllerTest {
 						.willReturn(transactionCredit);
 		String validJson = new GsonBuilder().create().toJson(dataMap);
 
-		mvc.perform(post("/api/transaction").content(validJson).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/transaction").content(validJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id", is(transactionCredit.getId())))
 				.andExpect(jsonPath("$.type.id", is(CREDIT)))
 				.andExpect(jsonPath("$.type.description", is(transactionCredit.getType().getDescription())))
@@ -130,9 +134,9 @@ public class TransactionControllerTest {
 		String json = new GsonBuilder().create().toJson(dataMap);
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "currency");
 
-		mvc.perform(post("/api/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/transaction")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/transaction")));
 	}
 
 	@Test
@@ -149,9 +153,9 @@ public class TransactionControllerTest {
 		String json = new GsonBuilder().create().toJson(dataMap);
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "accountId");
 
-		mvc.perform(post("/api/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/transaction")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/transaction")));
 	}
 
 	@Test
@@ -168,9 +172,9 @@ public class TransactionControllerTest {
 		String json = new GsonBuilder().create().toJson(dataMap);
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "transactionTypeId");
 
-		mvc.perform(post("/api/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/transaction")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/transaction")));
 	}
 
 	@Test
@@ -187,8 +191,8 @@ public class TransactionControllerTest {
 		String json = new GsonBuilder().create().toJson(dataMap);
 		String errorMessage = String.format(ErrorMessages.NO_MANDATORY_FIELD_2, "amount");
 
-		mvc.perform(post("/api/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(post("/api/v1/transaction").content(json).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message", is(errorMessage)))
-				.andExpect(jsonPath("$.details", is("uri=/api/transaction")));
+				.andExpect(jsonPath("$.details", is("uri=/api/v1/transaction")));
 	}
 }
