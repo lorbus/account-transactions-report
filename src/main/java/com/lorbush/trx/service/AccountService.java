@@ -18,9 +18,9 @@ public interface AccountService {
 
 	Account findById(@NotNull Integer id) throws CustomException;
 
-	List<Account> findByUserId(@NotBlank User user) throws CustomException;
+	List<Account> findByUserId(@NotNull Long id) throws CustomException;
 
-	Account createAccount(@NotBlank String iban, @NotBlank User user, @NotBlank String currencyName)
+	Account createAccount(@NotBlank String iban, @NotNull User user, @NotBlank String currencyName)
 			throws CustomException;
 
 	Account updateAccountAmount(@NotNull Account account, @NotBlank String amount, @NotNull Boolean isCredit)

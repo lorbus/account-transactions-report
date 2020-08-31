@@ -41,7 +41,6 @@ public class User {
     }
 
     public User(String username, String firstName, String lastName) {
-        this();
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -52,15 +51,14 @@ public class User {
      *
      */
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role", joinColumns
-            = @JoinColumn(name = "user_id",
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id",
             referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id",
                     referencedColumnName = "id"))
     private List<Role> roles;
 
     public List<String> getRolesNamesAsStrings() {
-        return getRoles().stream()
+        return this.roles.stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toList());
     }
@@ -73,47 +71,6 @@ public class User {
     @JsonProperty
     public void setPassword(String password) {
         this.password = password;
-    }
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
     }
 
 }

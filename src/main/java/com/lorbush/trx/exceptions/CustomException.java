@@ -5,8 +5,8 @@ package com.lorbush.trx.exceptions;
  *
  */
 public class CustomException extends Exception {
-	
-	private static final long serialVersionUID = 6467956781986618574L;
+	private static final long serialVersionUID = 6467956785206618574L;
+
 	private int errorCode;
 
 	public int getErrorCode() {

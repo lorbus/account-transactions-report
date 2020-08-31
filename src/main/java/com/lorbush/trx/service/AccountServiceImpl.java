@@ -9,9 +9,8 @@ import com.lorbush.trx.repository.CurrencyRepository;
 import com.lorbush.trx.repository.TransactionRepository;
 import com.lorbush.trx.repository.AccountRepository;
 import com.lorbush.trx.helper.Helper;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.ObjectNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +34,8 @@ import java.util.Optional;
 @Validated
 @PropertySource("classpath:application.properties")
 @Service
+@Slf4j
 class AccountServiceImpl implements AccountService {
-
-    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private AccountRepository accountRepository;
@@ -71,7 +68,7 @@ class AccountServiceImpl implements AccountService {
     @Transactional(rollbackFor = CustomException.class)
     @Override
     public List<Account> findAll() throws CustomException {
-        logger.debug("Call AccountServiceImpl.findAll");
+        log.debug("Call AccountServiceImpl.findAll");
         return accountRepository.findAllByOrderByIdAsc();
     }
 
@@ -84,7 +81,7 @@ class AccountServiceImpl implements AccountService {
     @Transactional(rollbackFor = CustomException.class)
     @Override
     public Account findById(@NotNull Integer id) throws CustomException {
-        logger.debug("Call AccountServiceImpl.findById");
+        log.debug("Call AccountServiceImpl.findById");
         Optional<Account> optionalAccount = accountRepository.findById(id);
         inputParametersValidator.conditionIsTrue(optionalAccount.isPresent(),
                 String.format(ErrorMessages.NO_ACCOUNT_FOUND, id), HttpStatus.BAD_REQUEST.value());
@@ -93,15 +90,21 @@ class AccountServiceImpl implements AccountService {
 
     /**
      *
-     * @param user
+     * @param
      * @return the list af accounts found by user Id
      * @throws CustomException when not possible to obtain the list of accounts
      */
+    /**
+     *
+     * @param id
+     * @return
+     * @throws CustomException
+     */
     @Transactional(rollbackFor = CustomException.class)
     @Override
-    public List<Account> findByUserId(@NotBlank User user) throws CustomException {
-        logger.debug("Call AccountServiceImpl.findByUserId");
-        return accountRepository.findByUserId(user.getId());
+    public List<Account> findByUserId(@NotNull Long id) throws CustomException {
+        log.debug("Call AccountServiceImpl.findByUserId");
+        return accountRepository.findByUserId(id);
     }
 
     /**
@@ -113,8 +116,8 @@ class AccountServiceImpl implements AccountService {
      */
     @Transactional(rollbackFor = CustomException.class)
     @Override
-    public Account createAccount(@NotBlank String id, @NotBlank User user, @NotBlank String currencyName) throws CustomException {
-        logger.debug("Call AccountServiceImpl.createAccount");
+    public Account createAccount(@NotBlank String id, @NotNull User user, @NotBlank String currencyName) throws CustomException {
+        log.debug("Call AccountServiceImpl.createAccount");
         try {
             Currency currency = currencyRepository.findByName(currencyName);
             String error = String.format(ErrorMessages.NO_CURRENCY_PRESENT,currencyName);
@@ -140,7 +143,7 @@ class AccountServiceImpl implements AccountService {
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = CustomException.class)
     @Override
     public Account updateAccountAmount(@NotNull Account account, @NotBlank String amount, @NotNull Boolean isCredit) throws CustomException {
-        logger.debug("Call AccountServiceImpl.updateAccountAmount");
+        log.debug("Call AccountServiceImpl.updateAccountAmount");
         try {
             BigDecimal transactionAmount = (isCredit) ? new BigDecimal(amount).abs() : new BigDecimal(amount).abs().negate();
 

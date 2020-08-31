@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(TransactionController.class)
+@WebMvcTest(controllers = TransactionController.class, secure = false)
 public class TransactionControllerTest {
 	@TestConfiguration
 	static class AccountControllerTestContextConfiguration {

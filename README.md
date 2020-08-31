@@ -6,12 +6,12 @@ Search for accounts and transactions. In order to create successfully a debit tr
 should be sufficient in the account (total available balance - debit amount >= 0). Currencies for transactions should be
 already created in the currency table, and currency of the account must be the same as the currency of the transaction.
 REST APIs are protected with Spring Security and JWT
-1. Get the JWT based token from the authentication endpoint.
-2. Extract token from the authentication result.
-3. Set the HTTP header `Authorization` value as `Bearer jwt_token`.
-4. Then send a request to access the protected resources. 
-5. If the requested resource is protected, Spring Security will use our custom `Filter` to validate the JWT token, and build an `Authentication` object and set it in Spring Security specific `SecurityContextHolder` to complete the authentication progress.
-6. If the JWT token is valid it will return the requested resource to client.
+    1. Get the JWT based token from the authentication endpoint.
+    2. Extract token from the authentication result.
+    3. Set the HTTP header `Authorization` value as `Bearer jwt_token`.
+    4. Then send a request to access the protected resources. 
+    5. If the requested resource is protected, Spring Security will use our custom `Filter` to validate the JWT token, and build an `Authentication` object and set it in Spring Security specific `SecurityContextHolder` to complete the authentication progress.
+    6. If the JWT token is valid it will return the requested resource to client.
 
 ## Running
 
@@ -22,9 +22,9 @@ REST APIs are protected with Spring Security and JWT
     ```
     mvn clean install
     ```
-4.  Builds all the images and starts the containers :
+4.  Builds all the images and starts the containers (from path src/main/docker) :
     ```
-    docker-compose up --build
+    docker-compose up
     ```
         To stop and remove containers and networks (images) :
         ```
@@ -96,7 +96,7 @@ REST APIs are protected with Spring Security and JWT
 
 ## Used technology
 
-1.  Spring Boot v2 (Spring v5) and Spring Data JPA
+1.  Spring Boot 2 (Spring 5) and Spring Data JPA
 2.  Swagger/OpenAPI version 2 (RESTful API Documentation Specification) 
     ```
     http://localhost:4444/api/v1/swagger-ui.html

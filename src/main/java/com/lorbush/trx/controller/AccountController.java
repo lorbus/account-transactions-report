@@ -67,18 +67,18 @@ class AccountController {
 
 	/**
 	 *
-	 * @param user
+	 * @param id
 	 * @return the list of Accounts of a User
 	 * @throws CustomException when failed to get the accounts by user id
 	 * @throws ClassNotFoundException
 	 */
 	@GetMapping(value = "api/v1/accounts/user", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String getAccountsByUserId(@RequestParam("userId") User user)
+	public String getAccountsByUserId(@RequestParam("userId") Long id)
 			throws CustomException, ClassNotFoundException {
-		logger.debug("Call AccountController.getAccountsByUserId with userId={}", user.getId());
+		logger.debug("Call AccountController.getAccountsByUserId with id={}", id);
 
-		List<Account> accounts = accountService.findByUserId(user);
+		List<Account> accounts = accountService.findByUserId(id);
 		return new GsonBuilder().setExclusionStrategies(new GsonExclusionStrategy(ExcludeField.EXCLUDE_TRANSACTIONS))
 				.create().toJson(accounts);
 	}

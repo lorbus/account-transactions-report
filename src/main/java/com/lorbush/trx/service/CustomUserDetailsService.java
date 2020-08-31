@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<com.lorbush.trx.entities.User> user = Optional.ofNullable(this.userRepository.findByUsername(username).
                 orElseThrow(() -> new UsernameNotFoundException("Username: " + username + " not found")));
-        //log.debug("loadUserByUsername...");
+        log.debug("loadUserByUsername...");
         return new User(user.get().getUsername(), user.get().getPassword(), new HashSet<>());
     }
 }

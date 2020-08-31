@@ -15,7 +15,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(value = {InvalidJwtAuthenticationException.class})
     public ResponseEntity invalidJwtAuthentication(InvalidJwtAuthenticationException ex, WebRequest request) {
-        //log.debug("handling InvalidJwtAuthenticationException...");
+        log.debug("Handling InvalidJwtAuthenticationException...");
         return status(UNAUTHORIZED).build();
     }
 }

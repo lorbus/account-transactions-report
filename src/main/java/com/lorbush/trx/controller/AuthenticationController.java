@@ -3,6 +3,7 @@ package com.lorbush.trx.controller;
 import com.lorbush.trx.repository.UserRepository;
 import com.lorbush.trx.security.jwt.JwtTokenProvider;
 import com.lorbush.trx.view.model.AuthenticationRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import java.util.Map;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
+@Slf4j
 @RequestMapping("/auth")
 public class AuthenticationController {
 
@@ -47,6 +49,8 @@ public class AuthenticationController {
             Map<Object, Object> model = new HashMap<>();
             model.put("username", username);
             model.put("token", token);
+
+            log.debug("Call AuthenticationController /signin ...");
 
             return ok(model);
 

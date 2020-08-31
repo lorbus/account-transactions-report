@@ -10,8 +10,7 @@ import com.lorbush.trx.repository.CurrencyRepository;
 import com.lorbush.trx.repository.TransactionRepository;
 import com.lorbush.trx.repository.TransactionTypeRepository;
 import com.lorbush.trx.helper.Helper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -30,9 +29,8 @@ import static com.lorbush.trx.exceptions.ErrorMessages.NUMBER_FORMAT_MISMATCH;
 @Validated
 @PropertySource("classpath:application.properties")
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
-
-	Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private TransactionRepository transactionRepository;
@@ -80,7 +78,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Transactional(rollbackFor = CustomException.class)
 	@Override
 	public List<Transaction> getTransactionsByAccountId(@NotNull Integer accountId) throws CustomException {
-		logger.debug("Call TransactionServiceImpl.getTransactionsByAccountId");
+		log.debug("Call TransactionServiceImpl.getTransactionsByAccountId");
 		Account account = accountService.findById(accountId);
 		if (account != null) {
 			return transactionRepository.findByAccount(account);
@@ -105,7 +103,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public Transaction createTransaction(@NotBlank String currencyName, @NotBlank String accountId,
 			@NotBlank String transactionTypeId, @NotBlank String amount, String description) throws CustomException {
-		logger.debug("Call TransactionServiceImpl.createTransaction");
+		log.debug("Call TransactionServiceImpl.createTransaction");
 		try {
 			// Find currency
 			Currency currency = currencyRepository.findByName(currencyName);

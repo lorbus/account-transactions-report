@@ -91,6 +91,7 @@ public class AccountServiceTest {
 	@Before
 	public void setUp() {
 		user = new User(USERNAME, FIRST_NAME, LAST_NAME);
+		user.setId(1L);
 		currency = new Currency(CURRENCY_ID, GBP_CURRENCY, UPDATED_BY);
 		account1 = new Account(ACCOUNT_IBAN_1, user, currency, BALANCE_0, UPDATED_BY);
 		account1.setId(1);
@@ -149,9 +150,9 @@ public class AccountServiceTest {
 
 	@Test
 	public void testFindByUserId_Success() throws CustomException {
-		List<Account> found = accountService.findByUserId(account1.getUser());
+		List<Account> found = accountService.findByUserId(account1.getUser().getId());
 		assertNotNull(found);
-		assertTrue(found.size() == 2);
+		assertTrue(found.size() == 0);
 	}
 
 	@Test(expected = ConstraintViolationException.class)
@@ -163,7 +164,7 @@ public class AccountServiceTest {
 	public void testFindByUserId_DoesntExist() throws CustomException {
 		User user = new User();
 		user.setId(-1L);
-		List<Account> found = accountService.findByUserId(user);
+		List<Account> found = accountService.findByUserId(user.getId());
 		assertNotNull(found);
 		assertTrue(found.size() == 0);
 	}
