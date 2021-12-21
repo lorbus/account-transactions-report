@@ -8,10 +8,10 @@ already created in the currency table, and currency of the account must be the s
 REST APIs are protected with Spring Security and JWT
     1. Get the JWT based token from the authentication endpoint.
     2. Extract token from the authentication result.
-    3. Set the HTTP header `Authorization` value as `Bearer jwt_token`.
+    3. Set the HTTP Header `Authorization` value as `Bearer jwt_token`.
     4. Then send a request to access the protected resources. 
-    5. If the requested resource is protected, Spring Security will use our custom `Filter` to validate the JWT token, and build an `Authentication` object and set it in Spring Security specific `SecurityContextHolder` to complete the authentication progress.
-    6. If the JWT token is valid it will return the requested resource to client.
+    5. If the resource is protected, Spring Security will use the custom `Filter` to validate the JWT token, build an `Authentication` object, and set it in Spring Security `SecurityContextHolder` to complete the authentication.
+    6. If the passed JWT token is valid the requested resource, will be returned to the client.
 
 ## Running
 
@@ -114,3 +114,4 @@ REST APIs are protected with Spring Security and JWT
 
 1.  CD/CI
 2.  Integration tests
+3.  UI
